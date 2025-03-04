@@ -1,10 +1,17 @@
 <?php
 function caesarCipher($action, $plaintext, $key) {
 
-//    var_dump($action, $plaintext, $key);
-//    die();
     $ciphertext = '';
-    $key = (int)$key; // Ensure the key is an integer
+    $key = (int)$key;
+
+    $alphabetString = "a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z";
+    $alphabetDictionary = str_split($alphabetString);
+    $plaintextChars = str_split($plaintext);
+
+    foreach ($plaintextChars as $char) {
+
+    }
+
 
     // Iterate over each character in the plaintext
     for ($i = 0; $i < strlen($plaintext); $i++) {

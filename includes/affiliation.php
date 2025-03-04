@@ -2,7 +2,7 @@
 
     <div class="col">
         <small>
-            Powered By Mosa Adekunle, Chibuzor Guy, Another Member
+            Powered By Mosa Adekunle, Chibuzor Kemakolam, Adeola Abioye
         </small>
 
     </div>
