@@ -5,11 +5,15 @@
 </head>
 <body>
 
+<style>
+    #encrypted-key{
+        color: #000;
+    }
+</style>
+
 <?php include "includes/app-title.php"; ?>
 
 <div class="container-fluid">
-
-
     <div class="row">
         <div class="col-10 text-end">
             <a href="logout.php">
@@ -39,20 +43,43 @@
     <div class="row mt-2">
         <div class="col-12 col-sm-8 offset-sm-2 col-md-6 offset-md-3">
 
+            <div class="row">
+                <div class="col">
+                    <h2>
+                        Welcome <?php echo $username; ?>
+                    </h2>
+                </div>
+            </div>
+
+
+            <div class="row">
+                <div class="col text-end">
+                    <a href="generate-rsa-key-receiver.php" style="text-decoration: none;">
+                        <button class="btn btn-danger btn-sm">Generate RSA Key</button>
+                    </a>
+                    <?php if (isset($_SESSION["receiver_public_key"]["e"]) && isset($_SESSION["receiver_public_key"]["n"])): ?>
+                        <button id="send-rsa-key-btn" class="btn btn-primary btn-sm">Send RSA Key</button>
+                        <br/>
+                        <small>RSA Public Key: e=<?= $_SESSION["receiver_public_key"]["e"] ?>, n=<?= $_SESSION["receiver_public_key"]["n"] ?></small>
+                        <br/>
+                        <small>RSA Private Key: d=<?= $_SESSION["receiver_private_key"]["d"] ?>, n=<?= $_SESSION["receiver_private_key"]["n"] ?></small>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+
 
             <div class="row">
                 <div class="col-10">
                     <h3>
-                        Message Receiving Session for <?php echo $username; ?>
+                        Message Receiving
                     </h3>
                 </div>
             </div>
 
 
             <div class="chat-box">
-
-                <form method="post" action="encrypt.php">
-
+                <form method="post" action="decrypt.php">
                     <div class="row mt-2 mb-2">
                         <div class="col-2">
                             <label for="ciphertext">CipherText:</label>
@@ -60,15 +87,10 @@
                     </div>
                     <div class="row mt-2 mb-2">
                         <div class="col">
-                            <textarea rows="6" readonly name="ciphertext" class="form-control encrypted-message"></textarea>
-                        </div>
-                    </div>
-                    <div class="row mt-2 mb-2">
-                        <div class="col-3 col-md-2">
-                            <label for="key">Key:</label>
-                        </div>
-                        <div class="col-9 col-md-10">
-                            <input type="text" name="key" class="key form-control"/>
+    <textarea rows="6" readonly name="ciphertext"
+              class="form-control encrypted-message-to-decode"><?=
+        isset($_SESSION["encrypted_message_to_decrypt"]) ? htmlspecialchars($_SESSION["encrypted_message_to_decrypt"], ENT_QUOTES, 'UTF-8') : '';
+        ?></textarea>
                         </div>
                     </div>
 
@@ -80,7 +102,7 @@
                             <select name="technique" type="text" class="form-control">
                                 <option value="caesar">Caesar cipher</option>
                                 <option value="monoalphabetic">Monoalphabetic</option>
-                                <option value="polyalphabetic">Polyalphabetic</option>
+                                <option value="polyalphabetic">Polyalphabetic (Vigenère)</option>
                                 <option value="hill">Hill cipher</option>
                                 <option value="playfair">Playfair</option>
                                 <option value="otp">OTP (One-Time Pad)</option>
@@ -95,9 +117,18 @@
                         </div>
                     </div>
 
+                    <div class="row mt-2 mb-2">
+                        <div class="col-3 col-md-2">
+                            <label for="key">Key:</label>
+                        </div>
+                        <div class="col-9 col-md-10">
+                            <input type="text" name="key" class="key form-control"/>
+                        </div>
+                    </div>
+
                     <div class="row text-end mb-2">
                         <div class="col">
-                            <input type="hidden" name="action" value="encrypt"/>
+                            <input type="hidden" name="action" value="decrypt"/>
                             <button class="btn btn-light">
                                 Decrypt
                             </button>
@@ -123,7 +154,7 @@
 
                     <div class="row mt-2 mb-2">
                         <div class="col">
-                            <textarea readonly name="plaintext"
+                            <textarea rows="6" readonly name="plaintext"
                                       class="form-control plaintext"><?php echo $_SESSION["decrypted_message"]; ?></textarea>
                         </div>
                     </div>
@@ -133,54 +164,144 @@
 
             <?php include "includes/affiliation.php"; ?>
         </div>
-
-
     </div>
-        <script>
 
-            // Check if a WebSocket connection already exists
-            let socket = null;
+    <div class="modal fade" id="key-send-modal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <p id="encrypted-key">key</p>
+                </div>
+                <div class="modal-footer">
+                    <button id="send-encrypted-key-btn" type="button" class="btn btn-success" data-bs-dismiss="modal">Send Key</button>
 
-            if (sessionStorage.getItem("socket")) {
-                socket = JSON.parse(sessionStorage.getItem("socket"));
-            } else {
-                // Create a new WebSocket connection if one doesn't exist
-                socket = new WebSocket('ws://127.0.0.1:8080');
-                socket.onopen = () => {
-                    let connection_message = "WebSocket connection established from <?=$username;?>.";
-                    console.log(connection_message);
-                    socket.send(connection_message);
-                };
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
 
-                socket.onmessage = (event) => {
-                    console.log(`Message received from server: ${event.data}`);
-                    $(".encrypted-message").html(event.data);
-                };
+                </div>
+            </div>
+        </div>
+    </div>
 
-                socket.onclose = (event) => {
-                    console.log(`WebSocket connection closed: ${event.code} - ${event.reason}`);
-                };
 
-                socket.onerror = (error) => {
-                    console.error('WebSocket error:', error);
-                };
+    <script>
+        // Check if a WebSocket connection already exists
+        let socket = null;
 
-                // Store the WebSocket object in sessionStorage to persist it across page reloads
-                socket.onopen = function() {
-                    sessionStorage.setItem("socket", JSON.stringify(socket));
-                }
-            }
-
-            // Close the WebSocket connection when leaving the page or when explicitly needed
-            window.onbeforeunload = function() {
-                if (socket) {
-                    socket.close();
-                }
-                sessionStorage.removeItem("socket");
+        if (sessionStorage.getItem("socket")) {
+            socket = JSON.parse(sessionStorage.getItem("socket"));
+        } else {
+            // Create a new WebSocket connection if one doesn't exist
+            socket = new WebSocket('ws://127.0.0.1:8080');
+            socket.onopen = () => {
+                let connection_message = "WebSocket connection established from <?=$username;?>.";
+                console.log(connection_message);
+                socket.send(connection_message);
             };
 
-        </script>
+            socket.onmessage = (event) => {
+                console.log(`Message received from server: ${event.data}`);
+                $(".encrypted-message").html(event.data);
+                let encrypted_message_to_store = `${event.data}`;
+// console.log(encrypted_message_to_store);
+//                 alert(encrypted_message_to_store);
+                if (encrypted_message_to_store !== "") {
 
+                    $.ajax({
+                        url: "save-session-variable.php",
+                        type: "POST",
+                        data: {
+                            variable: encrypted_message_to_store,
+                            variable_name: "encrypted_message_to_decrypt"
+                        },
+                        success: function (response) {
+                            $("#responseDiv").html("Server Response: " + response);
+
+                            $.ajax({
+                                url: "save-session-variable.php",
+                                type: "POST",
+                                data: {
+                                    variable: "",
+                                    variable_name: "decrypted_message"
+                                },
+                                success: function (response) {
+                                    $("#responseDiv").html("Server Response: " + response);
+                                    location.reload();// Refresh page.
+                                },
+                                error: function (xhr, status, error) {
+                                    console.error("Error: " + error);
+                                }
+                            });
+
+
+                        },
+                        error: function (xhr, status, error) {
+                            console.error("Error: " + error);
+                        }
+                    });
+
+
+
+                }
+            };
+
+            socket.onclose = (event) => {
+                console.log(`WebSocket connection closed: ${event.code} - ${event.reason}`);
+            };
+
+            socket.onerror = (error) => {
+                console.error('WebSocket error:', error);
+            };
+
+            // Store the WebSocket object in sessionStorage to persist it across page reloads
+            socket.onopen = function () {
+                sessionStorage.setItem("socket", JSON.stringify(socket));
+            }
+        }
+
+        // Close the WebSocket connection when leaving the page or when explicitly needed
+        window.onbeforeunload = function () {
+            if (socket) {
+                socket.close();
+            }
+            sessionStorage.removeItem("socket");
+        };
+
+
+        $("#send-rsa-key-btn").click(function(){
+
+            $.ajax({
+                url: "encrypt-rsa-key.php",
+                type: "POST",
+                data: {
+
+                    e: <?= $_SESSION["receiver_public_key"]["e"] ?>,
+                    n: <?= $_SESSION["receiver_public_key"]["n"] ?>
+                },
+                success: function (response) {
+                   $("#encrypted-key").html(response);
+                    const modal = new bootstrap.Modal(document.getElementById('key-send-modal'));
+                    modal.show();
+
+
+                    $("#send-encrypted-key-btn").click(function(){
+                        response_object = JSON.parse(response);
+
+                        response_object.action = "rsa_key";
+
+                        console.log(response_object, response);
+
+                        socket.send(JSON.stringify(response_object));
+                    });
+
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error: " + error);
+                }
+            });
+
+        });
+
+    </script>
 
 </body>
 </html>

@@ -58,3 +58,7 @@ textarea{
 .nav-btns a{
     text-decoration: none;
 }
+
+#encrypted-key{
+    color: #000;
+}

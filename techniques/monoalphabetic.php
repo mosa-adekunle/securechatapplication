@@ -1,25 +1,38 @@
 <?php
-function monoalphabeticCipher($action, $plaintext, $key) {
-    // Sample cipher implementation. Modify as needed for your algorithm.
-    // Example: Substituting the characters based on the key
-    $ciphertext = '';
-    // Assuming $key is a predefined substitution key
-    $alphabet = 'abcdefghijklmnopqrstuvwxyz';
-    $substitute = $key; // Substitute letters using the key
-    for ($i = 0; $i < strlen($plaintext); $i++) {
-        $char = $plaintext[$i];
-        if (ctype_alpha($char)) {
-            $isUpper = ctype_upper($char);
-            $char = strtolower($char);
-            $index = strpos($alphabet, $char);
-            if ($index !== false) {
-                $newChar = $substitute[$index];
-                $ciphertext .= $isUpper ? strtoupper($newChar) : $newChar;
+
+//sample key: QWERTYUIOPASDFGHJKLZXCVBNM
+function monoalphabeticCipher($action, $inputText, $key)
+{
+    $plainAlphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    $cipherText = '';
+    $inputText = strtoupper($inputText); // Normalize case
+
+    if ($action == 'encrypt') {
+        foreach (str_split($inputText) as $char) {
+            if (ctype_alpha($char)) {
+                $index = strpos($plainAlphabet, $char);
+                // Substitute with the corresponding letter in the provided substitution alphabet
+                $cipherText .= $key[$index];
+            } else {
+                $cipherText .= $char; // Keep non-alphabetic characters unchanged
             }
-        } else {
-            $ciphertext .= $char; // Non-alphabetic characters are added unchanged
         }
+        return $cipherText;
     }
-    return $ciphertext;
+
+    elseif ($action == 'decrypt') {
+        foreach (str_split($inputText) as $char) {
+            if (ctype_alpha($char)) {
+                // Find the index of the letter in the substitution alphabet
+                $index = strpos($key, $char);
+                // Replace with the corresponding letter from the plain alphabet
+                $cipherText .= $plainAlphabet[$index];
+            } else {
+                $cipherText .= $char; // Keep non-alphabetic characters unchanged
+            }
+        }
+        return $cipherText;
+    }
+
+    return "";
 }
-?>

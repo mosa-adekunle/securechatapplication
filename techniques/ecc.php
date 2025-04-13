@@ -5,4 +5,3 @@ function eccCipher($action, $plaintext, $key) {
     // Example: ECC logic here using $key
     return $ciphertext;
 }
-?>

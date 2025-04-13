@@ -1,23 +1,33 @@
 <?php
-function polyalphabeticCipher($action, $plaintext, $key) {
-    $ciphertext = '';
+function polyalphabeticCipher($action, $inputText, $key)
+{
+    //Vigenère Cipher
+    $plainAlphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    $cipherText = '';
+    $inputText = strtoupper($inputText); // Normalize input text to uppercase
+    $key = strtoupper($key); // Normalize key to uppercase
+    $keyLength = strlen($key);
     $keyIndex = 0;
-    $key = str_repeat($key, ceil(strlen($plaintext) / strlen($key))); // Repeat the key
 
-    for ($i = 0; $i < strlen($plaintext); $i++) {
-        $char = $plaintext[$i];
+    foreach (str_split($inputText) as $char) {
         if (ctype_alpha($char)) {
-            $keyChar = $key[$keyIndex];
-            $keyIndex++;
-            if (ctype_upper($char)) {
-                $ciphertext .= chr((ord($char) - ord('A') + ord(strtoupper($keyChar)) - ord('A')) % 26 + ord('A'));
+            $shift = strpos($plainAlphabet, $key[$keyIndex % $keyLength]); // Get shift value from the key
+            $index = strpos($plainAlphabet, $char);
+
+            if ($action == 'encrypt') {
+                $newIndex = ($index + $shift) % 26; // Apply shift forward
+            } elseif ($action == 'decrypt') {
+                $newIndex = ($index - $shift + 26) % 26; // Apply shift backward
             } else {
-                $ciphertext .= chr((ord($char) - ord('a') + ord(strtolower($keyChar)) - ord('a')) % 26 + ord('a'));
+                return ""; // Invalid action
             }
+
+            $cipherText .= $plainAlphabet[$newIndex];
+            $keyIndex++; // Move to the next letter in the key
         } else {
-            $ciphertext .= $char; // Non-alphabetic characters are added unchanged
+            $cipherText .= $char; // Keep non-alphabetic characters unchanged
         }
     }
-    return $ciphertext;
+
+    return $cipherText;
 }
-?>

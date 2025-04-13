@@ -1,37 +1,44 @@
 <?php
-function caesarCipher($action, $plaintext, $key) {
-
-    $ciphertext = '';
+function caesarCipher($action, $inputText, $key)
+{
+    $cipherText = '';
+    $plainText = '';
     $key = (int)$key;
+    $chars = str_split($inputText);
 
-    $alphabetString = "a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z";
-    $alphabetDictionary = str_split($alphabetString);
-    $plaintextChars = str_split($plaintext);
-
-    foreach ($plaintextChars as $char) {
-
-    }
-
-
-    // Iterate over each character in the plaintext
-    for ($i = 0; $i < strlen($plaintext); $i++) {
-        $char = $plaintext[$i];
-
-        if (ctype_alpha($char)) {
-            // Handle uppercase letters
-            if (ctype_upper($char)) {
-                $ciphertext .= chr((ord($char) - ord('A') + $key) % 26 + ord('A'));
+    if ($action == 'encrypt') {
+        // Iterate over each character in the plaintext
+        foreach ($chars as $i => $char) {
+            if (ctype_alpha($char)) {
+                // Handle uppercase letters
+                if (ctype_upper($char)) {
+                    $cipherText .= chr((ord($char) - ord('A') + $key) % 26 + ord('A'));
+                } // Handle lowercase letters
+                else {
+                    $cipherText .= chr((ord($char) - ord('a') + $key) % 26 + ord('a'));
+                }
+            } else {
+                $cipherText .= $char; // Non-alphabetic characters are added unchanged
             }
-            // Handle lowercase letters
-            else {
-                $ciphertext .= chr((ord($char) - ord('a') + $key) % 26 + ord('a'));
-            }
-        } else {
-            $ciphertext .= $char; // Non-alphabetic characters are added unchanged
         }
+        return $cipherText;
     }
-//
-//    var_dump($action, $plaintext, $key, $ciphertext);
-//    die();
-    return $ciphertext;
+
+    elseif ($action == 'decrypt') {
+//        $plainText = ""; // Initialize output
+
+        foreach (str_split($inputText) as $char) {
+            if (ctype_upper($char)) { // Uppercase letters
+                $plainText .= chr((ord($char) - ord('A') - $key + 26) % 26 + ord('A'));
+            } elseif (ctype_lower($char)) { // Lowercase letters
+                $plainText .= chr((ord($char) - ord('a') - $key + 26) % 26 + ord('a'));
+            } else {
+                $plainText .= $char; // Keep spaces, punctuation, and numbers unchanged
+            }
+        }
+
+        return $plainText;
+    }
+
+return "";
 }

@@ -42,8 +42,16 @@
 
             <div class="row">
                 <div class="col">
+                    <h2>
+                        Welcome <?php echo $username; ?>
+                    </h2>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col">
                     <h3>
-                        Message Sending Session for <?php echo $username; ?>
+                        Message Sending
                     </h3>
                 </div>
             </div>
@@ -58,17 +66,6 @@
                         <div class="col-9 col-md-10">
                         <textarea rows="6" name="plaintext"
                                   class="message"><?php echo $_SESSION["plaintext"]; ?></textarea>
-                        </div>
-                    </div>
-                    <div class="row mt-2 mb-2">
-                        <div class="col-3 col-md-2">
-                            <label for="key">Key:</label>
-                        </div>
-                        <div class="col-9 col-md-10">
-                            <input id="key" type="text" name="key" class="key form-control"
-                                   value="<?php echo $_SESSION["key"]; ?>"/>
-                            <span id="key-error" style="color: red; display: none;">Key must be an integer for Caesar cipher!</span>
-
                         </div>
                     </div>
 
@@ -88,7 +85,7 @@
                                     Monoalphabetic
                                 </option>
                                 <option value="polyalphabetic" <?php echo ($_SESSION["technique"] == 'polyalphabetic') ? 'selected' : ''; ?>>
-                                    Polyalphabetic
+                                    Polyalphabetic (Vigenère)
                                 </option>
                                 <option value="hill" <?php echo ($_SESSION["technique"] == 'hill') ? 'selected' : ''; ?>>
                                     Hill cipher
@@ -125,6 +122,19 @@
                                     (Elliptic Curve Cryptography)
                                 </option>
                             </select>
+                        </div>
+                    </div>
+
+
+                    <div class="row mt-2 mb-2">
+                        <div class="col-3 col-md-2">
+                            <label for="key">Key:</label>
+                        </div>
+                        <div class="col-9 col-md-10">
+                            <input id="key" type="text" name="key" class="key form-control"
+                                   value="<?php echo $_SESSION["key"]; ?>"/>
+                            <span id="key-error" style="color: red; display: none;">Key must be an integer for Caesar cipher!</span>
+
                         </div>
                     </div>
 
@@ -236,7 +246,21 @@
 
             socket.onmessage = (event) => {
                 console.log(`Message received from server: ${event.data}`);
-                $(".encrypted-message").html(event.data);
+
+                let data_received =  JSON.parse(event.data);
+                console.log(data_received.action) ;
+                if(data_received.action === "rsa_key") {
+                    alert(data_received.action +
+                    " received: " +
+                        "e:" +
+                        data_received.e +
+                        " n:" +
+                        data_received.n
+                    );
+                }
+                // console.log(data_received);
+                //
+                // $(".encrypted-message").html(event.data);
             };
 
             socket.onclose = (event) => {
@@ -261,11 +285,16 @@
             sessionStorage.removeItem("socket");
         };
 
-
         function sendMessage(message) {
             if (socket.readyState === WebSocket.OPEN) {
                 socket.send(message);
                 console.log(`Message sent: ${message}`);
+
+                // alert("Encrypted message sent");
+                setTimeout(function(){
+                    window.location = "send.php";
+                    // window.location = "clear-session.php";
+                }, 1000);
             } else {
                 console.warn('WebSocket is not open. Cannot send message.');
             }

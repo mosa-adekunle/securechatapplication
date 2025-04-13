@@ -11,7 +11,10 @@ if(isset($_SESSION['username'])){
     header("Location: send.php");
     exit;
 }
-//else{
-//    header("Location: index.php?msg=login-failed");
-//    exit;
-//}
+
+else{
+    header("Location: index.php?msg=login-failed");
+    exit;
+}
+
+//var_dump($_SESSION);
