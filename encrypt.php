@@ -83,7 +83,7 @@ switch ($technique) {
 
     case 'sha':
         include "techniques/sha.php";
-        $_SESSION["encrypted_message"] = shaCipher($action, $plaintext, $key);
+        $_SESSION["encrypted_message"] = shaCipher($action, $plaintext);
         break;
 
     default:

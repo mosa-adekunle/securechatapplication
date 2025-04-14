@@ -14,7 +14,7 @@ function modInverse($a, $m) {
     return -1; // No inverse found
 }
 
-// Generate RSA keys using two small primes (for educational purposes)
+// Generate RSA keys using two small primes
 // Returns keys as comma separated strings.
 function rsaGenerateKeys() {
     $p = 61;         // First prime

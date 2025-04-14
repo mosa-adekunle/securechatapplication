@@ -142,6 +142,7 @@
                                 <option value="rc4">RC4</option>
                                 <option value="rsa">RSA</option>
                                 <option value="ecc">ECC (Elliptic Curve Cryptography)</option>
+                                <option value="sha">SHA (Verify)</option>
                             </select>
                         </div>
                     </div>
@@ -280,9 +281,9 @@
         let socket = new WebSocket('ws://3.147.127.186:8080');
 
         socket.onopen = () => {
-            let connection_message = "WebSocket connection established from <?=$username;?>.";
-            console.log(connection_message);
-            socket.send(connection_message);
+            //let connection_message = "WebSocket connection established from <?php //=$username;?>//.";
+            //console.log(connection_message);
+            //socket.send(connection_message);
         };
 
         socket.onmessage = (event) => {

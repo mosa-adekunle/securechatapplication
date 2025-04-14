@@ -118,6 +118,9 @@
                                     ECC
                                     (Elliptic Curve Cryptography)
                                 </option>
+                                <option value="sha" <?php echo ($_SESSION["technique"] == 'sha') ? 'selected' : ''; ?>>
+                                    SHA (Hash)
+                                </option>
                             </select>
                         </div>
                     </div>
@@ -299,10 +302,90 @@
 
                 keyError.style.display = "none";
             }
+            else if (technique === 'des') {
+                const desError = isValidDESKey(keyValue);
+                if (desError !== "") {
+                    keyError.textContent = desError;
+                    keyError.style.display = "inline";
+                    return false;
+                }
 
+                keyError.style.display = "none";
+            }
+            else if (technique === 'aes') {
+                const aesError = isValidAESKey(keyValue);
+                if (aesError !== "") {
+                    keyError.textContent = aesError;
+                    keyError.style.display = "inline";
+                    return false;
+                }
 
+                keyError.style.display = "none";
+            }
+            else if (technique === 'rc4') {
+
+                const rc4Error = isValidRC4Key(keyValue);
+                if (rc4Error !== "") {
+                    keyError.textContent = rc4Error;
+                    keyError.style.display = "inline";
+                    return false;
+                }
+            }
+            else if (technique === 'sha') {
+
+                const shaError = isValidSHAKey(keyValue);
+                if (shaError !== "") {
+                    keyError.textContent = shaError;
+                    keyError.style.display = "inline";
+                    return false;
+                }
+            }
             keyError.style.display = "none";
             return true;
+        }
+
+        function  isValidSHAKey(key) {
+            if (key.trim().length > 0) {
+                return "SHA does not need a key";
+            }
+
+            return "";
+        }
+
+        function  isValidRC4Key(key) {
+            if (key.trim().length === 0) {
+                return "RC4 key cannot be empty.";
+            }
+
+            if (key.length > 64) {
+                return "RC4 key is too long. Limit to 64 characters.";
+            }
+
+            if (key.length < 6) {
+                return "RC4 key is too short. Make at least to 6 characters.";
+            }
+
+            return "";
+        }
+
+        function isValidAESKey(key) {
+            if (key.trim().length === 0) {
+                return "AES key cannot be empty.";
+            }
+
+            if (key.length > 64) {
+                return "AES key is too long. Limit to 64 characters.";
+            }
+            return ""; 
+        }
+
+
+        function isValidDESKey(key) {
+            if (!key.length >1) {
+                return "DES key must be greater than 1.";
+            }
+
+            return ""; 
         }
 
         function isValidColumnarKey(key) {
@@ -314,7 +397,7 @@
                 return "Key must be at least 2 characters long for Columnar cipher.";
             }
 
-            return ""; // ✅ Valid
+            return ""; 
         }
 
 
@@ -329,7 +412,7 @@
                 return "Rail Fence key must be less than or equal to the length of the input text.";
             }
 
-            return ""; // ✅ Valid
+            return ""; 
         }
 
 
@@ -349,7 +432,7 @@
                 return "Key must be at least as long as the input text for One-Time Pad.";
             }
 
-            return ""; // ✅ Valid
+            return ""; 
         }
 
 
@@ -429,7 +512,7 @@
                 return `Matrix is not invertible mod 26. Determinant is ${positiveDet}, which shares factors with 26.`;
             }
 
-            return ""; // No error = valid
+            return "";
         }
 
         // Simple modular exponentiation: calculates base^exp mod mod.
@@ -467,7 +550,6 @@
                 if (event.data && event.data.trim() !== "") {
                     try {
                         let data = JSON.parse(event.data);
-// alert();
                         // Check if the sender is initiating a Diffie–Hellman exchange.
                         if (data.action && data.action === "dh_exchange") {
                             // Extract the Diffie–Hellman parameters from the sender.

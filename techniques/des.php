@@ -2,16 +2,14 @@
 
 /**
  * DES encryption & decryption in pure PHP (ECB mode, 16 rounds).
- *
- *  - Use 'encrypt' to get a hex string.
- *  - Use 'decrypt' with that hex string to get original plaintext.
  *  - Key must be exactly 8 bytes (64 bits).
  *  - Plaintext is zero-padded to multiples of 8 bytes.
- *  - For real-world use, consider AES or 3DES instead.
+ *
  */
 
 function desCipher($action, $plaintext, $key) {
-    // Key must be exactly 8 bytes
+    $key = normalizeDesKey($key);
+
     if (strlen($key) !== 8) {
         throw new Exception("DES key must be exactly 8 bytes.");
     }
@@ -200,8 +198,6 @@ function xorBits($a, $b) {
     return $res;
 }
 
-// =============== DES TABLES ===============
-
 const SHIFT_SCHEDULE = [1,1,2,2,2,2,2,2,1,2,2,2,2,2,2,1];
 
 const PC1 = [
@@ -322,20 +318,14 @@ const SBOXES = [
     ]
 ];
 
-//// ====================== TEST CODE ======================
-//if (basename(__FILE__) === basename($_SERVER['PHP_SELF'])) {
-//    $plaintext = \"Sheldon\";
-//    $key       = \"Mykeyred\"; // 8 bytes
-//    echo \"Plaintext: $plaintext\\nKey: $key\\n\\n\";
-//
-//    // Encrypt -> hex
-//    $encryptedHex = desCipher('encrypt', $plaintext, $key);
-//    echo \"Encrypted (hex): $encryptedHex\\n\";
-//
-//    // Decrypt from hex -> original
-//    $decrypted = desCipher('decrypt', $encryptedHex, $key);
-//    echo \"Decrypted: $decrypted\\n\";
-//}
-//?>
-//
-//
+function normalizeDesKey($key) {
+    // If key is shorter than 8 bytes, pad it with null bytes ("\0")
+    if (strlen($key) < 8) {
+        return str_pad($key, 8, "\0");
+    }
+    // If key is longer than 8 bytes, truncate it to 8 bytes
+    elseif (strlen($key) > 8) {
+        return substr($key, 0, 8);
+    }
+    return $key;
+}
