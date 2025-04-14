@@ -52,11 +52,39 @@
             </div>
 
 
+<!--            <div class="row">-->
+<!--                <div class="col text-end">-->
+<!--                    <a href="generate-rsa-key-receiver.php" style="text-decoration: none;">-->
+<!--                        <button class="btn btn-danger btn-sm">Generate RSA Key</button>-->
+<!--                    </a>-->
+<!--                    --><?php //if (isset($_SESSION["receiver_public_key"]["e"]) && isset($_SESSION["receiver_public_key"]["n"])): ?>
+<!--                        <button id="send-rsa-key-btn" class="btn btn-primary btn-sm">Send RSA Key</button>-->
+<!--                        <br/>-->
+<!--                        <small>RSA Public Key: e=--><?php //= $_SESSION["receiver_public_key"]["e"] ?><!--, n=--><?php //= $_SESSION["receiver_public_key"]["n"] ?><!--</small>-->
+<!--                        <br/>-->
+<!--                        <small>RSA Private Key: d=--><?php //= $_SESSION["receiver_private_key"]["d"] ?><!--, n=--><?php //= $_SESSION["receiver_private_key"]["n"] ?><!--</small>-->
+<!--                    --><?php //endif; ?>
+<!--                </div>-->
+<!--            </div>-->
+
+
+
             <div class="row">
                 <div class="col text-end">
-                    <a href="generate-rsa-key-receiver.php" style="text-decoration: none;">
-                        <button class="btn btn-danger btn-sm">Generate RSA Key</button>
-                    </a>
+                    <!-- Button to display RSA parameter input fields -->
+                    <button id="show-rsa-btn" class="btn btn-danger btn-sm">Generate RSA Key</button>
+                    <!-- Hidden form for RSA parameters -->
+                    <form method="post" action="generate-rsa-key-receiver.php">
+
+                        <div id="rsa-params-form" style="display:none; margin-top:10px;">
+                            <input type="text" id="rsa_p" name="rsa_p" class="form-control" placeholder="Enter P" style="margin-bottom:5px;">
+                            <input type="text" id="rsa_q" name="rsa_q" class="form-control" placeholder="Enter Q" style="margin-bottom:5px;">
+                            <input type="text" id="rsa_e" name="rsa_e" class="form-control" placeholder="Enter E" style="margin-bottom:5px;">
+                            <button type="submit" id="complete-rsa-btn" class="btn btn-warning btn-sm">Complete RSA Key Generation</button>
+                        </div>
+                    </form>
+
+                    <!-- If the receiver's keys exist, display them and the Send RSA Key button -->
                     <?php if (isset($_SESSION["receiver_public_key"]["e"]) && isset($_SESSION["receiver_public_key"]["n"])): ?>
                         <button id="send-rsa-key-btn" class="btn btn-primary btn-sm">Send RSA Key</button>
                         <br/>
@@ -66,6 +94,18 @@
                     <?php endif; ?>
                 </div>
             </div>
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -181,6 +221,16 @@
             </div>
         </div>
     </div>
+
+    <script>
+        // When the "Generate RSA Key" button is clicked,
+        // show the RSA parameter input form and hide the button.
+        document.getElementById('show-rsa-btn').addEventListener('click', function() {
+            document.getElementById('rsa-params-form').style.display = 'block';
+            this.style.display = 'none';
+        });
+
+    </script>
 
 
     <script>
