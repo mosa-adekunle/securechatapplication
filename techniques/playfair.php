@@ -1,4 +1,8 @@
 <?php
+//5×5 grid of letters, built from keyword e.g. "KEYWORD".
+//Letters I and J are combined to fit 25 letters into the 5×5 grid.
+//Sample Key = CONCORDIA.
+
 function playfairCipher($action, $inputText, $key)
 {
     $inputText = strtoupper(str_replace('J', 'I', preg_replace('/[^A-Z]/', '', strtoupper($inputText))));

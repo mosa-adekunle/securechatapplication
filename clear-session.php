@@ -1,6 +1,18 @@
 <?php
 session_start();
-$_SESSION["technique"] = $_SESSION["plaintext"] = $_SESSION["encrypted_message"] = $_SESSION["key"] = "";
+
+
+// Store the username if it exists
+$username = isset($_SESSION['username']) ? $_SESSION['username'] : null;
+
+// Clear all session variables
+$_SESSION = array();
+
+// Restore the username if it was set
+if ($username !== null) {
+    $_SESSION['username'] = $username;
+}
+
 
 if (isset($_SERVER['HTTP_REFERER'])) {
     // Redirect to the previous page

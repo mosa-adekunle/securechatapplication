@@ -13,11 +13,28 @@
 
 <?php include "includes/app-title.php"; ?>
 
-
+<br>
 <div class="container-fluid">
     <div class="row">
-        <div class="col-10 text-end">
-            <a href="logout.php">
+        <div class="col">
+            <h2>
+                Logged in as <?php echo $username; ?>
+            </h2>
+
+        </div>
+        <div class="col text-end">
+            <a href="send.php" style="text-decoration: none;">
+                <button class="btn  btn-dark btn-sm">
+                    Send Message
+                </button>
+            </a>
+
+            <a href="clear-session.php" style="text-decoration: none;">
+                <btn class="btn btn-sm btn-dark">
+                    Clear Session
+                </btn>
+            </a>
+            <a href="logout.php" style="text-decoration: none;">
                 <btn class="btn btn-sm btn-dark">
                     Logout
                 </btn>
@@ -25,32 +42,9 @@
         </div>
     </div>
 
-    <div class="row mt-2 nav-btns">
-        <div class="col col-sm-8 offset-sm-2 text-end">
-            <a href="send.php">
-                <button class="btn btn-success btn-sm">
-                    Send Message
-                </button>
-            </a>
-
-            <a href="receive.php">
-                <button class="btn btn-danger btn-sm">
-                    Key Exchange
-                </button>
-            </a>
-        </div>
-    </div>
 
     <div class="row mt-2">
-        <div class="col-12 col-sm-8 offset-sm-2 col-md-6 offset-md-3">
-
-            <div class="row">
-                <div class="col">
-                    <h2>
-                        Welcome <?php echo $username; ?>
-                    </h2>
-                </div>
-            </div>
+        <div class="col">
 
 
 <!--            <div class="row">-->
@@ -71,7 +65,23 @@
 
 
             <div class="row">
-                <div class="col text-end">
+
+
+                <div class="col">
+
+
+                    <p>
+                        <svg width="35" height="55">
+                            <circle cx="25" cy="25" r="8" fill="green" class="blinking"/>
+                        </svg>
+                        <strong>
+                            Receiving
+                        </strong>
+
+                    </p>
+                </div>
+
+                <div class="col-7 text-end">
                     <!-- Button to display RSA parameter input fields -->
                     <button id="show-rsa-btn" class="btn btn-danger btn-sm">Generate RSA Key</button>
 
@@ -86,37 +96,13 @@
 
                     <!-- If the receiver's keys exist, display them and the Send RSA Key button -->
                     <?php if (isset($_SESSION["receiver_public_key"]["e"]) && isset($_SESSION["receiver_public_key"]["n"])): ?>
-                        <button id="send-rsa-key-btn" class="btn btn-primary btn-sm">Send RSA Key</button>
-                        <br/>
-                        <small>RSA Public Key: e=<?= $_SESSION["receiver_public_key"]["e"] ?>, n=<?= $_SESSION["receiver_public_key"]["n"] ?></small>
-                        <br/>
-                        <small>RSA Private Key: d=<?= $_SESSION["receiver_private_key"]["d"] ?>, n=<?= $_SESSION["receiver_private_key"]["n"] ?></small>
+                        <button id="send-rsa-key-btn" class="btn btn-dark btn-sm">Send RSA Key with Diffie–Hellman</button>
+                        <br/><br/>
+                        <small><strong>RSA Public Key</strong>: e=<?= $_SESSION["receiver_public_key"]["e"] ?>, n=<?= $_SESSION["receiver_public_key"]["n"] ?></small>
+                        <small><strong>RSA Private Key</strong>: d=<?= $_SESSION["receiver_private_key"]["d"] ?>, n=<?= $_SESSION["receiver_private_key"]["n"] ?></small>
                     <?php endif; ?>
-                </div>
-            </div>
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            <div class="row">
-                <div class="col-10">
-                    <h3>
-                        Message Receiving
-                    </h3>
                 </div>
             </div>
 
@@ -172,15 +158,9 @@
                     <div class="row text-end mb-2">
                         <div class="col">
                             <input type="hidden" name="action" value="decrypt"/>
-                            <button class="btn btn-light">
+                            <button class="btn btn-dark">
                                 Decrypt
                             </button>
-                            <br>
-                            <small>
-                                <a href="clear-session.php">
-                                    Clear
-                                </a>
-                            </small>
                         </div>
                     </div>
                 </form>
@@ -215,8 +195,9 @@
                 <div class="modal-body">
                     <p id="encrypted-key">key</p>
                 </div>
+                </div>
                 <div class="modal-footer">
-                    <button id="send-encrypted-key-btn" type="button" class="btn btn-success" data-bs-dismiss="modal">Send Key</button>
+                    <button id="send-encrypted-key-btn" type="button" class="btn btn-dark" data-bs-dismiss="modal">Send Key</button>
 
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
 
@@ -253,13 +234,10 @@
             this.style.display = 'none';
         });
 
-        // Add validation to the form submission.
         document.getElementById('complete-rsa-btn').addEventListener('click', function(event) {
             // Convert inputs to integers.
             var p = parseInt(document.getElementById('rsa_p').value.trim(), 10);
             var q = parseInt(document.getElementById('rsa_q').value.trim(), 10);
-            // Note: Validation for e is not required per the instructions,
-            // but you could add similar checks if needed.
 
             if (!p || p <= 1 || !isPrime(p)) {
                 alert("P must be a prime number greater than 1.");
@@ -276,74 +254,143 @@
     </script>
 
     <script>
-        // Check if a WebSocket connection already exists
-        let socket = null;
+        function xorEncrypt(plaintext, key) {
+            var result = "";
+            // Use key modulo 256 as a single byte (this is very weak cryptography, for demo only)
+            var k = key % 256;
+            for (var i = 0; i < plaintext.length; i++) {
+                result += String.fromCharCode(plaintext.charCodeAt(i) ^ k);
+            }
+            // Encode the result in base64 to ensure it's safe to transmit in JSON
+            return btoa(result);
+        }
 
-        if (sessionStorage.getItem("socket")) {
-            socket = JSON.parse(sessionStorage.getItem("socket"));
-        } else {
-            // Create a new WebSocket connection if one doesn't exist
-            socket = new WebSocket('ws://3.147.127.186:8080');
-            console.log(socket);
-            socket.onopen = () => {
-                let connection_message = "WebSocket connection established from <?=$username;?>.";
-                console.log(connection_message);
-                socket.send(connection_message);
-            };
+        function isJson(str) {
+            try {
+                JSON.parse(str);
+                return true;
+            } catch (e) {
+                return false;
+            }
+        }
 
-            socket.onmessage = (event) => {
-                console.log(`Message received from server: ${event.data}`);
-                $(".encrypted-message").html(event.data);
-                let encrypted_message_to_store = `${event.data}`;
+    </script>
 
-                if (encrypted_message_to_store !== "") {
+    <script>
+        let socket = new WebSocket('ws://3.147.127.186:8080');
 
-                    $.ajax({
-                        url: "save-session-variable.php",
-                        type: "POST",
-                        data: {
-                            variable: encrypted_message_to_store,
-                            variable_name: "encrypted_message_to_decrypt"
-                        },
-                        success: function (response) {
-                            $("#responseDiv").html("Server Response: " + response);
+        socket.onopen = () => {
+            let connection_message = "WebSocket connection established from <?=$username;?>.";
+            console.log(connection_message);
+            socket.send(connection_message);
+        };
+
+        socket.onmessage = (event) => {
+
+            console.log(`Message received from server: ${event.data}`);
+
+
+            if (event.data && event.data.trim() !== "") {
+                try {
+
+                    if (isJson(event.data)) {
+                        let data_received = JSON.parse(event.data);
+                        if (data_received.action && data_received.action === "dh_exchange_reply") {
+                            // Receiver's DH public value and parameter p are received.
+                            let B = data_received.receiverPublic;
+                            let p = data_received.p;  // must be the same p we used.
+                            // Compute shared secret s = B^(our_private) mod p using our stored DH private key.
+                            var sharedSecret = modExp(dhData.privateKey, 1, p);  // placeholder
+                            // Actually, compute sharedSecret = (B^our_private mod p)
+                            sharedSecret = modExp(B, dhData.privateKey, p);
+                            console.log("Shared Secret computed:", sharedSecret);
+
+
+                            var rsaKeyObject = {
+                                e: <?= isset($_SESSION["receiver_public_key"]["e"]) ? $_SESSION["receiver_public_key"]["e"] : 'null'; ?>,
+                                n: <?= isset($_SESSION["receiver_public_key"]["n"]) ? $_SESSION["receiver_public_key"]["n"] : 'null'; ?>
+                            };
+
+
+                            // Convert the object to a JSON string.
+                            var rsaKeyString = JSON.stringify(rsaKeyObject);
+                            // Encrypt the RSA key string using our shared secret (via XOR encryption).
+                            var encryptedRsaKey = xorEncrypt(rsaKeyString, sharedSecret);
+
+                            // Create the message to be sent
+                            var rsaKeyMessage = {
+                                action: "rsa_key_encrypted",
+                                encryptedRsaKey: encryptedRsaKey
+                                // Optionally, you might remove sharedSecret from the clear; here it's not sent.
+                            };
+
+
+
+                            socket.send(JSON.stringify(rsaKeyMessage));
+                            console.log("Sent RSA key message:", rsaKeyMessage);
+                        }
+                        else if (data_received.action && data_received.action === "rsa_key") {
+                            alert("RSA key received: e:" + data_received.e + " n:" + data_received.n);
+                        }
+                    }
+                    else{
+                        $(".encrypted-message").html(event.data);
+                        let encrypted_message_to_store = `${event.data}`;
+
+                        if (encrypted_message_to_store !== "") {
 
                             $.ajax({
                                 url: "save-session-variable.php",
                                 type: "POST",
                                 data: {
-                                    variable: "",
-                                    variable_name: "decrypted_message"
+                                    variable: encrypted_message_to_store,
+                                    variable_name: "encrypted_message_to_decrypt"
                                 },
                                 success: function (response) {
                                     $("#responseDiv").html("Server Response: " + response);
-                                    location.reload();// Refresh page.
+
+                                    $.ajax({
+                                        url: "save-session-variable.php",
+                                        type: "POST",
+                                        data: {
+                                            variable: "",
+                                            variable_name: "decrypted_message"
+                                        },
+                                        success: function (response) {
+                                            $("#responseDiv").html("Server Response: " + response);
+                                            location.reload();// Refresh page.
+                                        },
+                                        error: function (xhr, status, error) {
+                                            console.error("Error: " + error);
+                                        }
+                                    });
                                 },
                                 error: function (xhr, status, error) {
                                     console.error("Error: " + error);
                                 }
                             });
-                        },
-                        error: function (xhr, status, error) {
-                            console.error("Error: " + error);
                         }
-                    });
+                    }
+
+                } catch (e) {
+                    console.error("Error parsing JSON from event.data:", e);
                 }
-            };
-
-            socket.onclose = (event) => {
-                console.log(`WebSocket connection closed: ${event.code} - ${event.reason}`);
-            };
-
-            socket.onerror = (error) => {
-                console.error('WebSocket error:', error);
-            };
-
-            // Store the WebSocket object in sessionStorage to persist it across page reloads
-            socket.onopen = function () {
-                sessionStorage.setItem("socket", JSON.stringify(socket));
             }
-        }
+        };
+
+        socket.onclose = (event) => {
+            console.log(`WebSocket connection closed: ${event.code} - ${event.reason}`);
+        };
+
+        socket.onerror = (error) => {
+            console.error('WebSocket error:', error);
+        };
+
+        window.onbeforeunload = function () {
+            if (socket && socket.readyState === WebSocket.OPEN) {
+                socket.close();
+            }
+        };
 
         // Close the WebSocket connection when leaving the page or when explicitly needed
         window.onbeforeunload = function () {
@@ -353,34 +400,46 @@
             sessionStorage.removeItem("socket");
         };
 
-
+        // When "Send RSA Key" is clicked, perform Diffie–Hellman exchange.
         $("#send-rsa-key-btn").click(function(){
-
-            $.ajax({
-                url: "encrypt-rsa-key.php",
-                type: "POST",
-                data: {
-
-                    e: <?= $_SESSION["receiver_public_key"]["e"] ?>,
-                    n: <?= $_SESSION["receiver_public_key"]["n"] ?>
-                },
-                success: function (response) {
-                   $("#encrypted-key").html(response);
-                    const modal = new bootstrap.Modal(document.getElementById('key-send-modal'));
-                    modal.show();
-
-                    $("#send-encrypted-key-btn").click(function(){
-                        response_object = JSON.parse(response);
-                        response_object.action = "rsa_key";
-                        console.log(response_object, response);
-                        socket.send(JSON.stringify(response_object));
-                    });
-                },
-                error: function (xhr, status, error) {
-                    console.error("Error: " + error);
-                }
-            });
+            // Generate our Diffie–Hellman key pair.
+            dhData = diffieHellmanGenerate();
+            console.log("Our DH Data:", dhData);
+            // Send our DH public data to the receiver.
+            var dhMessage = {
+                action: "dh_exchange",
+                p: dhData.p,
+                g: dhData.g,
+                publicKey: dhData.publicKey
+            };
+            socket.send(JSON.stringify(dhMessage));
+            console.log("Sent DH public data:", dhMessage);
         });
+
+        // Generate a simple Diffie–Hellman key pair (for demo purposes with small parameters).
+        function diffieHellmanGenerate() {
+            const p = 23; // demonstration prime (use large primes in production)
+            const g = 5;  // demonstration generator
+            const privateKey = Math.floor(Math.random() * (p - 2)) + 1; // random integer in [1, p-2]
+            const publicKey = modExp(g, privateKey, p);
+            return { p: p, g: g, privateKey: privateKey, publicKey: publicKey };
+        }
+
+        // Simple modular exponentiation: calculates base^exp mod mod.
+        function modExp(base, exp, mod) {
+            var result = 1;
+            base = base % mod;
+            while (exp > 0) {
+                if (exp % 2 === 1) {
+                    result = (result * base) % mod;
+                }
+                exp = Math.floor(exp / 2);
+                base = (base * base) % mod;
+            }
+            return result;
+        }
+
+
     </script>
 </body>
 </html>

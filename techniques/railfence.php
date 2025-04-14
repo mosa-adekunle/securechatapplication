@@ -1,4 +1,6 @@
 <?php
+#ZipZag pattern
+# Key is number of rails
 
 function railFenceCipher($action, $text, $key)
 {

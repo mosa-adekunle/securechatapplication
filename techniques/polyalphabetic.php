@@ -1,4 +1,9 @@
 <?php
+
+//Vigenere cipher.
+//Repeats key to match the PT word
+//Shifts keys by distance of keyword from A
+//Sample Key = CONCORDIA
 function polyalphabeticCipher($action, $inputText, $key)
 {
     //Vigenère Cipher

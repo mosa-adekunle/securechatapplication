@@ -5,10 +5,8 @@ function columnarCipher($mode, $text, $key, $padChar = 'X') {
     $key = strtolower($key);
     $keyLength = strlen($key);
 
-
-    // Step 1: Create an ordered map of key positions
+    //Create an ordered map of key positions
     $keyOrder = getKeyOrder($key);
-
 
     if ($mode === "encrypt") {
         // Remove spaces and pad the text
@@ -91,14 +89,3 @@ function getKeyOrder($key) {
 
     return $keyOrder;
 }
-
-//
-//// 🔍 Example usage:
-//$encrypted = columnarCipher("encrypt", "Sheldon", "Rat");
-//$decrypted = columnarCipher("decrypt", $encrypted, "Rat");
-//
-//
-//echo "Encrypted: $encrypted\n";
-//echo "Decrypted: $decrypted\n";
-
-

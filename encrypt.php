@@ -81,6 +81,11 @@ switch ($technique) {
         $_SESSION["encrypted_message"] = eccCipher($action, $plaintext, $key);
         break;
 
+    case 'sha':
+        include "techniques/sha.php";
+        $_SESSION["encrypted_message"] = shaCipher($action, $plaintext, $key);
+        break;
+
     default:
         echo "Invalid technique selected.";
         break;

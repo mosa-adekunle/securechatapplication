@@ -1,6 +1,6 @@
 <?php
-
-##SampleKey aB1dF2gH3jKlMnOpQrStUvWxYzAbCdEfGhIjKlMn
+#XOR operation with key and PT
+#Key should be same length as PT
 
 /**
  * Performs One Time Pad encryption and decryption.

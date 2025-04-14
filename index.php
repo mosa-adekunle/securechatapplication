@@ -7,12 +7,10 @@
 </head>
 <body>
 
+<?php include "includes/app-title.php"; ?>
 
-<h1>
-    AnonyChat
-</h1>
-<h2>
-    A Encrypted Messaging Application
+<h2 class="text-center">
+    A Cryptographic Application
 </h2>
 
 <div class="row mt-5">
@@ -31,7 +29,7 @@
                 </div>
                 <div class="row text-end">
                     <div class="col">
-                        <button class="btn btn-light">
+                        <button class="btn btn-dark">
                             Login
                         </button>
                     </div>

@@ -1,10 +1,10 @@
 body{
-    background-color: black;
-    color: #ffffff;
+    background-color: #f3f3f3;
+    color: #000000;
 }
 .login-box{
     padding: 20px;
-    border: 2px solid #fff;
+    border: 1px solid #000000;
     border-radius: 5px;
 }
 h1{
@@ -12,9 +12,10 @@ h1{
     margin-top: 2rem;
 }
 h2{
-    margin-top: 3rem;
-    text-align: center;
-    font-size: 1.3rem
+    /*margin-top: 3rem;*/
+    /*text-align: center;*/
+    font-size: 1.1rem;
+    font-style: italic;
 }
 h3{
     margin-top: 1rem;
@@ -30,14 +31,14 @@ textarea{
     padding: 1rem;
 }
 .chat-box{
-    padding: 20px;
-    border: 2px solid #fff;
-    border-radius: 5px;
+    /*padding: 20px;*/
+    /*border: 2px solid #fff;*/
+    /*border-radius: 5px;*/
     /*max-width: 600px;*/
     /*margin: auto;*/
 }
 .message{
-    border: 1px solid #ffffff;
+    border: 1px solid #cccccc;
     border-radius: 5px;
     padding: 10px;
     font-size: 0.8rem;
@@ -52,8 +53,9 @@ textarea{
 }
 .encrypted-message{
     min-height: 71px;
-    background-color: #000000!important;
-    color: #ffffff!important;
+    /*background-color: #000000!important;*/
+    color: #000000!important;
+    font-size: 0.9rem;
 }
 .nav-btns a{
     text-decoration: none;
@@ -61,4 +63,22 @@ textarea{
 
 #encrypted-key{
     color: #000;
+}
+
+.form-control{
+    border-radius: 0;
+    border-color: #000000;
+    background-color: #f3f3f3;
+}
+
+
+
+
+.blinking {
+    animation: blink-animation 1s steps(2) infinite;
+}
+@keyframes blink-animation {
+    0% { opacity: 1; }
+    /*50% { opacity: 0; }*/
+    100% { opacity: 0; }
 }

@@ -1,4 +1,10 @@
 <?php
+//Only encrypts letters
+//KEy is format 1,2,3,4
+//Sample key: 3,3,2,5
+// Matrix must be invertible mod 26 why?
+/// Decryption requires multiplying by the inverse of the key matrix modulo 26.
+
 function parseKeyMatrix($keyString, $size)
 {
     $values = explode(',', $keyString);
@@ -42,42 +48,36 @@ function hillCipher($action, $inputText, $keyString)
 {
     $plainAlphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     $mod = 26;
+    $size = 2; // 2x2 matrix
 
-    // Parse key matrix from string
-    $size = 2; // Default to 2x2 matrix (extendable)
+    // Clean and normalize input
+    $inputText = strtoupper(preg_replace('/[^a-zA-Z]/', '', $inputText));// remove non-letters
+    while (strlen($inputText) % $size !== 0) {
+        $inputText .= 'X'; // pad with 'X'
+    }
+
     $keyMatrix = parseKeyMatrix($keyString, $size);
     if (!$keyMatrix) {
         return "Error: Invalid key matrix format.";
     }
 
-    // Prepare text (uppercase, remove spaces, ensure even length)
-    $inputText = strtoupper(preg_replace('/[^A-Z]/', '', $inputText)); // Remove non-alphabetic characters
-    $outputText = '';
-
-    // Ensure input length is even
-    while (strlen($inputText) % $size != 0) {
-        $inputText .= 'X'; // Padding
-    }
-
-    // Encryption and Decryption
-    if ($action == 'decrypt') {
-        // Compute determinant and modular inverse
+    // Handle decryption: compute inverse matrix mod 26
+    if ($action === 'decrypt') {
         $det = ($keyMatrix[0][0] * $keyMatrix[1][1] - $keyMatrix[0][1] * $keyMatrix[1][0]) % $mod;
-        if ($det < 0) {
-            $det += $mod;
-        }
+        if ($det < 0) $det += $mod;
+
         $detInv = modInverse($det, $mod);
-        if ($detInv == -1) {
+        if ($detInv === -1) {
             return "Error: Matrix is not invertible.";
         }
 
-        // Compute inverse matrix mod 26
+        // Compute adjugate and multiply by detInv mod 26
         $keyMatrix = [
             [($keyMatrix[1][1] * $detInv) % $mod, (-$keyMatrix[0][1] * $detInv) % $mod],
             [(-$keyMatrix[1][0] * $detInv) % $mod, ($keyMatrix[0][0] * $detInv) % $mod]
         ];
 
-        // Ensure positive values
+        // Normalize negative numbers
         for ($i = 0; $i < $size; $i++) {
             for ($j = 0; $j < $size; $j++) {
                 if ($keyMatrix[$i][$j] < 0) {
@@ -87,27 +87,17 @@ function hillCipher($action, $inputText, $keyString)
         }
     }
 
-    // Process text in blocks
-    $inputIndex = 0;
+    // Encrypt or decrypt
+    $outputText = '';
     for ($i = 0; $i < strlen($inputText); $i += $size) {
-        if (!ctype_alpha($inputText[$i])) {
-            $outputText .= $inputText[$i]; // Add spaces and non-alphabet characters as is
-            continue;
+        $block = [];
+        for ($j = 0; $j < $size; $j++) {
+            $block[] = strpos($plainAlphabet, $inputText[$i + $j]);
         }
 
-        // Convert text into numbers (A = 0, B = 1, ..., Z = 25)
-        $pair = [];
-        for ($j = 0; $j < $size; $j++) {
-            $pair[] = strpos($plainAlphabet, $inputText[$inputIndex]);
-            $inputIndex++;
-        }
-
-        // Apply matrix transformation
-        $result = matrixMultiplyMod($keyMatrix, $pair, $mod);
-
-        // Convert numbers back to letters
-        for ($j = 0; $j < $size; $j++) {
-            $outputText .= $plainAlphabet[$result[$j]];
+        $result = matrixMultiplyMod($keyMatrix, $block, $mod);
+        foreach ($result as $num) {
+            $outputText .= $plainAlphabet[$num];
         }
     }
 

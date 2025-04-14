@@ -1,5 +1,5 @@
 <?php
-
+//Maps each key to is corresponding albertic position. Key must be 26 letters long.
 //sample key: QWERTYUIOPASDFGHJKLZXCVBNM
 function monoalphabeticCipher($action, $inputText, $key)
 {

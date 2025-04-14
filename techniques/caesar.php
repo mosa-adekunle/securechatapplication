@@ -1,4 +1,6 @@
 <?php
+
+//Shifts keys by the number of integers in the key. Key must be an integer.
 function caesarCipher($action, $inputText, $key)
 {
     $cipherText = '';
@@ -25,7 +27,6 @@ function caesarCipher($action, $inputText, $key)
     }
 
     elseif ($action == 'decrypt') {
-//        $plainText = ""; // Initialize output
 
         foreach (str_split($inputText) as $char) {
             if (ctype_upper($char)) { // Uppercase letters
@@ -36,7 +37,6 @@ function caesarCipher($action, $inputText, $key)
                 $plainText .= $char; // Keep spaces, punctuation, and numbers unchanged
             }
         }
-
         return $plainText;
     }
 
