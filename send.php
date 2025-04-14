@@ -237,7 +237,7 @@
             socket = JSON.parse(sessionStorage.getItem("socket"));
         } else {
             // Create new WebSocket connection
-            socket = new WebSocket('ws://127.0.0.1:8080');
+            socket = new WebSocket('ws://3.147.127.186:8080');
             socket.onopen = () => {
                 let connection_message = "WebSocket connection established from <?=$username;?>.";
                 console.log(connection_message);
@@ -247,20 +247,22 @@
             socket.onmessage = (event) => {
                 console.log(`Message received from server: ${event.data}`);
 
-                let data_received =  JSON.parse(event.data);
-                console.log(data_received.action) ;
-                if(data_received.action === "rsa_key") {
-                    alert(data_received.action +
-                    " received: " +
-                        "e:" +
-                        data_received.e +
-                        " n:" +
-                        data_received.n
-                    );
+                if (event.data && event.data.trim() !== "") {
+                    let data_received =  JSON.parse(event.data);
+                    console.log(data_received.action) ;
+                    if(data_received.action === "rsa_key") {
+                        alert(data_received.action +
+                            " received: " +
+                            "e:" +
+                            data_received.e +
+                            " n:" +
+                            data_received.n
+                        );
+                    }
                 }
-                // console.log(data_received);
-                //
-                // $(".encrypted-message").html(event.data);
+
+
+
             };
 
             socket.onclose = (event) => {

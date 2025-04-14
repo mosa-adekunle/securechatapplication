@@ -13,6 +13,7 @@
 
 <?php include "includes/app-title.php"; ?>
 
+
 <div class="container-fluid">
     <div class="row">
         <div class="col-10 text-end">
@@ -73,13 +74,12 @@
                 <div class="col text-end">
                     <!-- Button to display RSA parameter input fields -->
                     <button id="show-rsa-btn" class="btn btn-danger btn-sm">Generate RSA Key</button>
-                    <!-- Hidden form for RSA parameters -->
-                    <form method="post" action="generate-rsa-key-receiver.php">
 
+                    <!-- Hidden form for RSA parameters -->
+                    <form method="post" action="generate-rsa-key-receiver.php" id="rsa-form">
                         <div id="rsa-params-form" style="display:none; margin-top:10px;">
                             <input type="text" id="rsa_p" name="rsa_p" class="form-control" placeholder="Enter P" style="margin-bottom:5px;">
                             <input type="text" id="rsa_q" name="rsa_q" class="form-control" placeholder="Enter Q" style="margin-bottom:5px;">
-                            <input type="text" id="rsa_e" name="rsa_e" class="form-control" placeholder="Enter E" style="margin-bottom:5px;">
                             <button type="submit" id="complete-rsa-btn" class="btn btn-warning btn-sm">Complete RSA Key Generation</button>
                         </div>
                     </form>
@@ -94,6 +94,9 @@
                     <?php endif; ?>
                 </div>
             </div>
+
+
+
 
 
 
@@ -232,6 +235,45 @@
 
     </script>
 
+    <script>
+        // Function to test if a number is prime.
+        function isPrime(num) {
+            if (num <= 1) return false;
+            if (num <= 3) return true;
+            if (num % 2 === 0 || num % 3 === 0) return false;
+            for (var i = 5; i * i <= num; i += 6) {
+                if (num % i === 0 || num % (i + 2) === 0) return false;
+            }
+            return true;
+        }
+
+        // Reveal the RSA parameter inputs when the "Generate RSA Key" button is clicked.
+        document.getElementById('show-rsa-btn').addEventListener('click', function() {
+            document.getElementById('rsa-params-form').style.display = 'block';
+            this.style.display = 'none';
+        });
+
+        // Add validation to the form submission.
+        document.getElementById('complete-rsa-btn').addEventListener('click', function(event) {
+            // Convert inputs to integers.
+            var p = parseInt(document.getElementById('rsa_p').value.trim(), 10);
+            var q = parseInt(document.getElementById('rsa_q').value.trim(), 10);
+            // Note: Validation for e is not required per the instructions,
+            // but you could add similar checks if needed.
+
+            if (!p || p <= 1 || !isPrime(p)) {
+                alert("P must be a prime number greater than 1.");
+                event.preventDefault();
+                return;
+            }
+            if (!q || q <= 1 || !isPrime(q)) {
+                alert("Q must be a prime number greater than 1.");
+                event.preventDefault();
+                return;
+            }
+            // If validation passes, the form will submit.
+        });
+    </script>
 
     <script>
         // Check if a WebSocket connection already exists
@@ -241,7 +283,8 @@
             socket = JSON.parse(sessionStorage.getItem("socket"));
         } else {
             // Create a new WebSocket connection if one doesn't exist
-            socket = new WebSocket('ws://127.0.0.1:8080');
+            socket = new WebSocket('ws://3.147.127.186:8080');
+            console.log(socket);
             socket.onopen = () => {
                 let connection_message = "WebSocket connection established from <?=$username;?>.";
                 console.log(connection_message);
@@ -252,8 +295,7 @@
                 console.log(`Message received from server: ${event.data}`);
                 $(".encrypted-message").html(event.data);
                 let encrypted_message_to_store = `${event.data}`;
-// console.log(encrypted_message_to_store);
-//                 alert(encrypted_message_to_store);
+
                 if (encrypted_message_to_store !== "") {
 
                     $.ajax({
@@ -281,16 +323,11 @@
                                     console.error("Error: " + error);
                                 }
                             });
-
-
                         },
                         error: function (xhr, status, error) {
                             console.error("Error: " + error);
                         }
                     });
-
-
-
                 }
             };
 
@@ -332,26 +369,18 @@
                     const modal = new bootstrap.Modal(document.getElementById('key-send-modal'));
                     modal.show();
 
-
                     $("#send-encrypted-key-btn").click(function(){
                         response_object = JSON.parse(response);
-
                         response_object.action = "rsa_key";
-
                         console.log(response_object, response);
-
                         socket.send(JSON.stringify(response_object));
                     });
-
                 },
                 error: function (xhr, status, error) {
                     console.error("Error: " + error);
                 }
             });
-
         });
-
     </script>
-
 </body>
 </html>

@@ -39,28 +39,28 @@ function rsaGenerateKeys() {
 // RSA cipher function that works similar to desCipher.
 // Accepts an action ("encrypt" or "decrypt"), the input text, and a key provided as a comma-separated string "exp,n".
 function rsaCipher($action, $plaintext, $key) {
+
     // Split the key string by comma and validate its format.
     $keyParts = explode(',', $key);
     if (count($keyParts) != 2) {
         return "Invalid key format. Please use 'exp,n'.";
     }
+
     $exp = (int) trim($keyParts[0]);
     $n = (int) trim($keyParts[1]);
 
     if ($action === 'encrypt') {
         $cipherArray = [];
+
         foreach (str_split($plaintext) as $char) {
             $m = ord($char);
             // Compute c = m^exp mod n using bcpowmod() for large number arithmetic.
             $c = bcpowmod($m, $exp, $n);
             $cipherArray[] = $c;
         }
+
         return implode(' ', $cipherArray);
     } elseif ($action === 'decrypt') {
-
-        var_dump($_SESSION["receiver_private_key"]);
-//        die();
-
 
         $output = "";
         $tokens = explode(' ', $plaintext);
@@ -76,17 +76,3 @@ function rsaCipher($action, $plaintext, $key) {
     }
     return "";
 }
-
-/*
-// Example usage for testing:
-
-$keys = rsaGenerateKeys();
-$plaintext = "Hello, World!";
-$encrypted = rsaCipher("encrypt", $plaintext, $keys['public']);
-$decrypted = rsaCipher("decrypt", $encrypted, $keys['private']);
-
-echo "Original: $plaintext\n";
-echo "Encrypted: $encrypted\n";
-echo "Decrypted: $decrypted\n";
-*/
-?>
