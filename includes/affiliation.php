@@ -2,7 +2,7 @@
 
     <div class="col">
         <small>
-            &copy;2025 Mosa Adekunle, Chibuzor Kemakolam, Adeola Abioye
+            &copy;2025 Mosa Adekunle
         </small>
 
     </div>
